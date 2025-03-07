@@ -7,7 +7,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.oq68b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -26,16 +25,28 @@ async function run() {
     await client.connect();
     // Send a ping to confirm a successful connection
 
-    
-    const productsCollection = client.db("groceryMartDB").collection("products")
+    const productsCollection = client
+      .db("groceryMartDB")
+      .collection("products");
+
 
 
     app.get("/products", async (req, res) => {
-      const result = await productsCollection.find().toArray()
-      res.send(result)
-    })
+      const result = await productsCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/product/:category", async (req, res) => {
+      const category = req.params.category;
+      const filter = { category };
+      const result = await productsCollection.find(filter).toArray();
+      res.send(result);
+    });
 
 
+
+
+    
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -46,8 +57,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
 
 app.get("/", (req, res) => {
   res.send({ running: true });
