@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.oq68b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -25,11 +25,18 @@ async function run() {
     await client.connect();
     // Send a ping to confirm a successful connection
 
+    const categoryCollection = client
+      .db("groceryMartDB")
+      .collection("categories");
+
     const productsCollection = client
       .db("groceryMartDB")
       .collection("products");
 
-
+    app.get("/categories", async (req, res) => {
+      const result = await categoryCollection.find().toArray();
+      res.send(result);
+    });
 
     app.get("/products", async (req, res) => {
       const result = await productsCollection.find().toArray();
@@ -43,10 +50,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/item/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {id}
+      const result = await productsCollection.findOne(query)
+      res.send(result)
+    });
 
-
-
-    
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
