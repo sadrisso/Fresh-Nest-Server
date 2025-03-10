@@ -33,6 +33,8 @@ async function run() {
       .db("groceryMartDB")
       .collection("products");
 
+    const cartCollection = client.db("groceryMartDB").collection("cartItems");
+
     app.get("/categories", async (req, res) => {
       const result = await categoryCollection.find().toArray();
       res.send(result);
@@ -52,9 +54,27 @@ async function run() {
 
     app.get("/item/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {id}
-      const result = await productsCollection.findOne(query)
-      res.send(result)
+      const query = { id };
+      const result = await productsCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.post("/cartItem", async (req, res) => {
+      const data = req.body;
+      const result = await cartCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/cartItems", async (req, res) => {
+      const result = await cartCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.delete("/cartItem/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
     });
 
     await client.db("admin").command({ ping: 1 });
