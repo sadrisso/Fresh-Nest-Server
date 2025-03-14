@@ -41,7 +41,26 @@ async function run() {
     });
 
     app.get("/products", async (req, res) => {
-      const result = await productsCollection.find().toArray();
+      const sortOption = req?.query?.sort || "default";
+      const searchQuery = req?.query?.search || "";
+
+      let sortQuery = {};
+      let filterQuery = {};
+
+      if (sortOption === "price-low") {
+        sortQuery = { price: 1 }; // Ascending order
+      } else if (sortOption === "price-high") {
+        sortQuery = { price: -1 }; // Descending order
+      } else if (sortOption === "stock") {
+        sortQuery = { stock: -1 }; // Higher stock first
+      }
+
+      if (searchQuery) {
+        filterQuery = { name: { $regex: searchQuery, $options: "i" } };
+        // $options: "i" makes the search case-insensitive
+      }
+
+      const result = await productsCollection.find(filterQuery).sort(sortQuery).toArray();
       res.send(result);
     });
 
