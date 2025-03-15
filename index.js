@@ -99,20 +99,25 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/increseQuantity/:id", async (req, res) => {
-      const id = req.params.id;
+    app.patch("/updateQuantity/:id", async (req, res) => {
+      const id = req?.params?.id;
+      const action = req?.query?.action;
+
       if (!id) {
         return res.status(400).send("Product ID is required");
       }
 
-      let query = { _id: new ObjectId(id) }
+      let query = { _id: new ObjectId(id) };
+      let update;
 
-      const result = await productsCollection.updateOne(
-        query,
-        { $inc: { quantity: 1 } }
-      );
+      if (action === "increase") {
+        update = { $inc: { quantity: 1 } };
+      } else if (action === "decrease") {
+        update = { $inc: { quantity: -1 } };
+      }
 
-      res.send(result)
+      const result = await cartCollection.updateOne(query, update);
+      res.send(result);
     });
 
     await client.db("admin").command({ ping: 1 });
