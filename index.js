@@ -60,7 +60,10 @@ async function run() {
         // $options: "i" makes the search case-insensitive
       }
 
-      const result = await productsCollection.find(filterQuery).sort(sortQuery).toArray();
+      const result = await productsCollection
+        .find(filterQuery)
+        .sort(sortQuery)
+        .toArray();
       res.send(result);
     });
 
@@ -94,6 +97,22 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
       res.send(result);
+    });
+
+    app.patch("/increseQuantity/:id", async (req, res) => {
+      const id = req.params.id;
+      if (!id) {
+        return res.status(400).send("Product ID is required");
+      }
+
+      let query = { _id: new ObjectId(id) }
+
+      const result = await productsCollection.updateOne(
+        query,
+        { $inc: { quantity: 1 } }
+      );
+
+      res.send(result)
     });
 
     await client.db("admin").command({ ping: 1 });
