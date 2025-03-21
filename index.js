@@ -52,7 +52,7 @@ async function run() {
       } else if (sortOption === "price-high") {
         sortQuery = { price: -1 }; // Descending order
       } else if (sortOption === "stock") {
-        sortQuery = { stock: -1 }; // Higher stock first
+        sortQuery = { stock: 1 }; // Higher stock first
       }
 
       if (searchQuery) {
@@ -91,6 +91,13 @@ async function run() {
       const result = await cartCollection.find().toArray();
       res.send(result);
     });
+
+    app.get("/cartItem/:id", async (req, res) => {
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await cartCollection.findOne(query)
+      res.send(result)
+    })
 
     app.delete("/cartItem/:id", async (req, res) => {
       const id = req.params.id;
